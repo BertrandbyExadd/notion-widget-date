@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Date & Semaine</title>
+
   <style>
     :root{
       --bg: #ffffff;
@@ -12,14 +13,15 @@
       --text: #111827;
       --muted: rgba(17,24,39,.65);
     }
+
     *{ box-sizing: border-box; }
-    html, body { height: 100%; }
+
     body{
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: transparent; /* Notion background shows through */
       padding: 14px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: transparent;
+      color: var(--text);
     }
 
     .card{
@@ -27,8 +29,7 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
       border-radius: 16px;
-      padding: 14px 16px;
-      width: 100%;
+      padding: 16px;
       max-width: 520px;
       margin: 0 auto;
     }
@@ -43,67 +44,37 @@
     .left{
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
     }
 
     .icon{
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 12px;
       background: rgba(0,0,0,.06);
       display: grid;
       place-items: center;
-      flex: 0 0 auto;
       font-size: 18px;
-      line-height: 1;
+      flex-shrink: 0;
     }
 
     .date{
       font-weight: 700;
       font-size: 16px;
-      letter-spacing: .2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 360px;
     }
 
-    .meta{
-      margin-top: 2px;
-      font-size: 12.5px;
-      color: var(--muted);
-    }
-
-    .pill{
-      flex: 0 0 auto;
+    .week{
       font-weight: 700;
       font-size: 13px;
-      padding: 8px 10px;
+      padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: rgba(0,0,0,.03);
-    }
-
-    .divider{
-      height: 1px;
-      background: rgba(0,0,0,.08);
-      margin: 12px 0;
-    }
-
-    .footer{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 12.5px;
-      color: var(--muted);
-      gap: 10px;
-    }
-
-    .tiny{
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      flex-shrink: 0;
     }
 
     @media (prefers-color-scheme: dark){
@@ -115,71 +86,43 @@
         --muted: rgba(229,231,235,.65);
       }
       .icon{ background: rgba(255,255,255,.08); }
-      .pill{ background: rgba(255,255,255,.06); }
-      .divider{ background: rgba(255,255,255,.10); }
+      .week{ background: rgba(255,255,255,.06); }
     }
   </style>
 </head>
+
 <body>
-  <div class="card" role="group" aria-label="Date et numéro de semaine">
+  <div class="card">
     <div class="row">
       <div class="left">
-        <div class="icon" aria-hidden="true">📅</div>
-        <div style="min-width:0;">
-          <div id="date" class="date">—</div>
-          <div class="meta" id="meta">—</div>
-        </div>
+        <div class="icon">📅</div>
+        <div id="date" class="date">—</div>
       </div>
-      <div class="pill" id="week">Semaine —</div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="footer">
-      <div class="tiny" id="timezone">Fuseau : —</div>
-      <div class="tiny" id="updated">Màj : —</div>
+      <div id="week" class="week">Semaine —</div>
     </div>
   </div>
 
   <script>
-    // ISO week number (ISO 8601)
+    // Calcul du numéro de semaine ISO 8601
     function getISOWeek(date) {
       const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = d.getUTCDay() || 7; // 1..7 (Mon..Sun)
+      const dayNum = d.getUTCDay() || 7;
       d.setUTCDate(d.getUTCDate() + 4 - dayNum);
       const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
       return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     }
 
-    function pad2(n){ return String(n).padStart(2, "0"); }
+    const now = new Date();
 
-    function render() {
-      const now = new Date();
+    const dateStr = now.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
 
-      const dateStr = now.toLocaleDateString("fr-FR", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-      });
-
-      const timeStr = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-
-      const week = getISOWeek(now);
-
-      document.getElementById("date").textContent = dateStr;
-      document.getElementById("week").textContent = `Semaine ${week}`;
-      document.getElementById("meta").textContent = `Heure : ${timeStr}`;
-      document.getElementById("updated").textContent = `Màj : ${timeStr}`;
-
-      // Display local timezone label if available
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      document.getElementById("timezone").textContent = tz ? `Fuseau : ${tz}` : `Fuseau : local`;
-    }
-
-    // Initial render + update every minute so the time stays accurate
-    render();
-    setInterval(render, 60 * 1000);
+    document.getElementById("date").textContent = dateStr;
+    document.getElementById("week").textContent = "Semaine " + getISOWeek(now);
   </script>
 </body>
 </html>
