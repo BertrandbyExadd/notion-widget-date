@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compte à rebours</title>
+
+  <style>
+    :root{
+      --bg: #141B30;
+      --border: #141B30;
+      --shadow: none;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,.75);
+    }
+
+    *{ box-sizingigger
+
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: transparent;
+      padding: 14px;
+    }
+
+    .card{
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .top{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title{
+      font-weight: 800;
+      font-size: 16px;
+      margin: 0 0 2px 0;
+    }
+
+    .subtitle{
+      font-size: 12.5px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .pill{
+      font-weight: 800;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" role="group" aria-label="Widget compte à rebours">
+    <div class="top">
+      <div>
+        <h1 id="displayTitle" class="title"></h1>
+        <p id="displayDate" class="subtitle"></p>
+      </div>
+      <div id="displayCountdown" class="pill"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ===============================
+       PARAMÈTRES FIXES
+       =============================== */
+
+    const TITLE = "Trace des maquisards";
+    const TARGET_DATE = "2026-02-07"; // format YYYY-MM-DD
+
+    /* ===============================
+       LOGIQUE
+       =============================== */
+
+    const displayTitle = document.getElementById("displayTitle");
+    const displayDate = document.getElementById("displayDate");
+    const displayCountdown = document.getElementById("displayCountdown");
+
+    function formatDateFR(date){
+      return date.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      });
+    }
+
+    function daysBetweenLocalMidnights(fromDate, toDate){
+      const from = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+      const to = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+      return Math.round((to - from) / 86400000);
+    }
+
+    function render(){
+      displayTitle.textContent = TITLE;
+
+      const [y, m, d] = TARGET_DATE.split("-").map(Number);
+      const target = new Date(y, m - 1, d);
+      const now = new Date();
+
+      displayDate.textContent = formatDateFR(target);
+
+      const diffDays = daysBetweenLocalMidnights(now, target);
+
+      if(diffDays > 0){
+        displayCountdown.textContent = `J-${diffDays}`;
+      }else if(diffDays === 0){
+        displayCountdown.textContent = "Aujourd’hui";
+      }else{
+        displayCountdown.textContent = `J+${Math.abs(diffDays)}`;
+      }
+    }
+
+    render();
+    setInterval(render, 60 * 1000);
+  </script>
+</body>
+</html>
